@@ -15,11 +15,6 @@ model/ufoonly.py	当前定义的是 UFO＋残差、无 LayerNorm 的消融模型
 onlyufo.py	调用 ufoonly.py，训练消融模型，并在训练后测试。
 注：通过删除残差代码完成仅仅UFO Module的消融
 
-性能实验：
-basic_bilstm_crf.py	定义不使用 BERT 的基础 BiLSTM-CRF 模型。
-train_basic.py	调用bilstm-crf模型进行训练和测试。
-train_idcnn.py	在文件内定义 IDCNN-CRF，并完成训练和测试。
-
 三元组与图谱阶段：
 batch_process.py	读取 BIO 文件，将实体组合为“鸟名—关系—属性值”，汇总生成三元组文件。
 相似度.py	找出三元组中相似的属性值，经人工确认后归并，减少重复或近义表达。
