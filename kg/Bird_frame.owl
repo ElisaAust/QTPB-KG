@@ -1,0 +1,317 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.qingzanggaoyuan.com#"
+     xml:base="http://www.qingzanggaoyuan.com"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://www.qingzanggaoyuan.com"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#IUCN评级为 -->
+
+    <owl:ObjectProperty rdf:about="http://www.qingzanggaoyuan.com#IUCN评级为">
+        <rdfs:domain rdf:resource="http://www.qingzanggaoyuan.com#中文名"/>
+        <rdfs:range rdf:resource="http://www.qingzanggaoyuan.com#IUCN"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#体长范围 -->
+
+    <owl:ObjectProperty rdf:about="http://www.qingzanggaoyuan.com#体长范围">
+        <rdfs:domain rdf:resource="http://www.qingzanggaoyuan.com#中文名"/>
+        <rdfs:range rdf:resource="http://www.qingzanggaoyuan.com#体长"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#分布于 -->
+
+    <owl:ObjectProperty rdf:about="http://www.qingzanggaoyuan.com#分布于">
+        <rdfs:domain rdf:resource="http://www.qingzanggaoyuan.com#中文名"/>
+        <rdfs:range rdf:resource="http://www.qingzanggaoyuan.com#分布地"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#叫声为 -->
+
+    <owl:ObjectProperty rdf:about="http://www.qingzanggaoyuan.com#叫声为">
+        <rdfs:domain rdf:resource="http://www.qingzanggaoyuan.com#中文名"/>
+        <rdfs:range rdf:resource="http://www.qingzanggaoyuan.com#叫声"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#国家保护级别为 -->
+
+    <owl:ObjectProperty rdf:about="http://www.qingzanggaoyuan.com#国家保护级别为">
+        <rdfs:domain rdf:resource="http://www.qingzanggaoyuan.com#中文名"/>
+        <rdfs:range rdf:resource="http://www.qingzanggaoyuan.com#中国保护等级"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#属于目 -->
+
+    <owl:ObjectProperty rdf:about="http://www.qingzanggaoyuan.com#属于目">
+        <rdfs:domain rdf:resource="http://www.qingzanggaoyuan.com#中文名"/>
+        <rdfs:range rdf:resource="http://www.qingzanggaoyuan.com#目"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#属于科 -->
+
+    <owl:ObjectProperty rdf:about="http://www.qingzanggaoyuan.com#属于科">
+        <rdfs:domain rdf:resource="http://www.qingzanggaoyuan.com#中文名"/>
+        <rdfs:range rdf:resource="http://www.qingzanggaoyuan.com#科"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#形态特征 -->
+
+    <owl:ObjectProperty rdf:about="http://www.qingzanggaoyuan.com#形态特征">
+        <rdfs:domain rdf:resource="http://www.qingzanggaoyuan.com#中文名"/>
+        <rdfs:range rdf:resource="http://www.qingzanggaoyuan.com#特征"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#栖息于 -->
+
+    <owl:ObjectProperty rdf:about="http://www.qingzanggaoyuan.com#栖息于">
+        <rdfs:domain rdf:resource="http://www.qingzanggaoyuan.com#中文名"/>
+        <rdfs:range rdf:resource="http://www.qingzanggaoyuan.com#栖息地"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#生活海拔 -->
+
+    <owl:ObjectProperty rdf:about="http://www.qingzanggaoyuan.com#生活海拔">
+        <rdfs:domain rdf:resource="http://www.qingzanggaoyuan.com#中文名"/>
+        <rdfs:range rdf:resource="http://www.qingzanggaoyuan.com#海拔"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#迁徙类型 -->
+
+    <owl:ObjectProperty rdf:about="http://www.qingzanggaoyuan.com#迁徙类型">
+        <rdfs:domain rdf:resource="http://www.qingzanggaoyuan.com#中文名"/>
+        <rdfs:range rdf:resource="http://www.qingzanggaoyuan.com#迁徙情况"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#食物有 -->
+
+    <owl:ObjectProperty rdf:about="http://www.qingzanggaoyuan.com#食物有">
+        <rdfs:domain rdf:resource="http://www.qingzanggaoyuan.com#中文名"/>
+        <rdfs:range rdf:resource="http://www.qingzanggaoyuan.com#食物"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#别名 -->
+
+    <owl:DatatypeProperty rdf:about="http://www.qingzanggaoyuan.com#别名">
+        <rdfs:domain rdf:resource="http://www.qingzanggaoyuan.com#中文名"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#拉丁名 -->
+
+    <owl:DatatypeProperty rdf:about="http://www.qingzanggaoyuan.com#拉丁名">
+        <rdfs:domain rdf:resource="http://www.qingzanggaoyuan.com#中文名"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#英文名 -->
+
+    <owl:DatatypeProperty rdf:about="http://www.qingzanggaoyuan.com#英文名">
+        <rdfs:domain rdf:resource="http://www.qingzanggaoyuan.com#中文名"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#IUCN -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#IUCN">
+        <rdfs:subClassOf rdf:resource="http://www.qingzanggaoyuan.com#保护级别"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#中国保护等级 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#中国保护等级">
+        <rdfs:subClassOf rdf:resource="http://www.qingzanggaoyuan.com#保护级别"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#中文名 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#中文名">
+        <rdfs:subClassOf rdf:resource="http://www.qingzanggaoyuan.com#名称"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#体长 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#体长">
+        <rdfs:subClassOf rdf:resource="http://www.qingzanggaoyuan.com#形态特征"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#保护级别 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#保护级别"/>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#分布地 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#分布地">
+        <rdfs:subClassOf rdf:resource="http://www.qingzanggaoyuan.com#生态习性"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#分类信息 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#分类信息"/>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#叫声 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#叫声">
+        <rdfs:subClassOf rdf:resource="http://www.qingzanggaoyuan.com#形态特征"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#名称 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#名称"/>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#形态特征 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#形态特征"/>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#栖息地 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#栖息地">
+        <rdfs:subClassOf rdf:resource="http://www.qingzanggaoyuan.com#生态习性"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#海拔 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#海拔">
+        <rdfs:subClassOf rdf:resource="http://www.qingzanggaoyuan.com#生态习性"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#特征 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#特征">
+        <rdfs:subClassOf rdf:resource="http://www.qingzanggaoyuan.com#形态特征"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#生态习性 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#生态习性"/>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#目 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#目">
+        <rdfs:subClassOf rdf:resource="http://www.qingzanggaoyuan.com#分类信息"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#科 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#科">
+        <rdfs:subClassOf rdf:resource="http://www.qingzanggaoyuan.com#分类信息"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#迁徙情况 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#迁徙情况">
+        <rdfs:subClassOf rdf:resource="http://www.qingzanggaoyuan.com#生态习性"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.qingzanggaoyuan.com#食物 -->
+
+    <owl:Class rdf:about="http://www.qingzanggaoyuan.com#食物">
+        <rdfs:subClassOf rdf:resource="http://www.qingzanggaoyuan.com#生态习性"/>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi -->
+
