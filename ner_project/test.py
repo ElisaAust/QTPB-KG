@@ -1,7 +1,7 @@
 import sys
 import os
 
-# 自动获取当前脚本所在的绝对路径，并将其设为搜索根目录
+# Automatically obtain the absolute path of the current script and set it as the search root directory
 cur_path = os.path.dirname(os.path.abspath(__file__))
 if cur_path not in sys.path:
     sys.path.insert(0, cur_path)
@@ -12,7 +12,7 @@ from transformers import BertTokenizerFast
 from seqeval.metrics import classification_report, f1_score, precision_score, recall_score
 from tqdm import tqdm
 
-# === 1. 环境与路径设置 ===
+# === 1. Environment and Path Settings ===
 PROJECT_ROOT = os.path.dirname(__file__)
 MODEL_DIR = os.path.join(PROJECT_ROOT, 'model')
 if MODEL_DIR not in sys.path:
@@ -21,7 +21,7 @@ if MODEL_DIR not in sys.path:
 from model.data_util import read_data, NERDataset, collate_fn
 from model.bbc import BertBiLSTMCRF_BBC
 
-# 尝试引入 Attention 模型 (兼容性处理)
+# Attempting to introduce the Attention model (handling compatibility)
 try:
     from bert_bilstm_crf import BertBiLSTMCRF
 except ImportError:
@@ -37,7 +37,7 @@ def evaluate(model, loader, idx2tag, device):
             attention_mask = batch['attention_mask'].to(device)
             labels = batch['labels'].cpu().numpy()
             
-            # === 获取预测结果 ===
+            # === Obtain prediction results ===
             if hasattr(model, 'decode'):
                  preds = model.decode(input_ids, attention_mask)
             elif hasattr(model, 'crf'):
@@ -60,7 +60,7 @@ def evaluate(model, loader, idx2tag, device):
                  emissions = model(input_ids, attention_mask)
                  preds = torch.argmax(emissions, dim=-1).cpu().numpy()
 
-            # === 标签对齐 ===
+            # === Label alignment ===
             for i, p_seq in enumerate(preds):
                 l_seq = labels[i]
                 true_seq = [idx2tag[l] for l, p in zip(l_seq, p_seq) if l != -100]
@@ -69,19 +69,19 @@ def evaluate(model, loader, idx2tag, device):
                 all_preds.append(pred_seq)
                 all_labels.append(true_seq)
     
-    # === 核心修改：转换为百分比格式 ===
+    # === Key change: Converted to percentage format. ===
     precision = precision_score(all_labels, all_preds)
     recall = recall_score(all_labels, all_preds)
     f1 = f1_score(all_labels, all_preds)
 
     print("\n" + "="*30 + " 最终评估报告 " + "="*30)
-    # 这里乘以 100 并保留 2 位小数
+    # Multiply by 100 here and keep two decimal places.
     print(f"准确率 (Precision): {precision * 100:.2f}%")
     print(f"召回率 (Recall):    {recall * 100:.2f}%")
     print(f"F1 分数 (F1 Score): {f1 * 100:.2f}%")
     print("-" * 60)
     
-    # digits=4 让表格显示更精确，虽然表格里还是小数，但更详细
+    # `digits=4` makes the table display more precise; although the values ​​remain decimals, they are shown in greater detail.
     print(classification_report(all_labels, all_preds, digits=4))
 
 if __name__ == "__main__":
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # === 自动路径修正 ===
+    # === Automatic Path Correction ===
     data_dir = os.path.join(PROJECT_ROOT, 'data')
     if not os.path.exists(data_dir): data_dir = PROJECT_ROOT 
     
@@ -103,7 +103,7 @@ if __name__ == "__main__":
         print(f"❌ 错误: 找不到 {train_file}")
         sys.exit(1)
 
-    # === 自动寻找 BERT ===
+    # === Automatically find BERT ===
     possible_paths = [
         'E:/PythonProject/ner_project/bert-base',
     ]
@@ -114,7 +114,7 @@ if __name__ == "__main__":
             break
     print(f"Loading BERT from: {bert_dir}")
 
-    # === 准备数据 ===
+    # === Prepare data ===
     _, train_tags = read_data(train_file)
     label_set = sorted(set(t for s in train_tags for t in s))
     if 'O' not in label_set: label_set.append('O')
@@ -127,7 +127,7 @@ if __name__ == "__main__":
     test_ds = NERDataset(test_texts, test_tags, tokenizer, tag2idx, max_len=512, stride=128)
     test_loader = DataLoader(test_ds, batch_size=8, shuffle=False, collate_fn=collate_fn)
 
-    # === 加载模型 ===
+    # === Load model ===
     print(f"Loading model... [Mode: {args.attention}]")
     if args.attention == "none":
         model = BertBiLSTMCRF_BBC(bert_dir, 256, len(tag2idx)).to(device)
