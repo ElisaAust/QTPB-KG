@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-批量处理所有BIO格式鸟类文件，生成三元组
+Batch process all bird-related files in BIO format to generate triples
 """
 
 import os
@@ -9,7 +9,7 @@ import glob
 
 def parse_bio_file(file_path):
     """
-    解析BIO格式文件，返回每个鸟类的实体信息
+    Parse BIO-format files and return entity information for each bird
     """
     birds = []
     current_bird = {}
@@ -23,10 +23,10 @@ def parse_bio_file(file_path):
     for line in lines:
         line = line.strip()
         
-        # 空行表示一个鸟类结束
+        # A blank line indicates the end of a bird entry
         if not line:
             if current_entity and current_entity_type:
-                # 保存最后一个实体
+                # Save the last entity
                 if current_entity_type not in current_bird:
                     current_bird[current_entity_type] = []
                 current_bird[current_entity_type].append(current_entity_text.strip())
@@ -47,7 +47,7 @@ def parse_bio_file(file_path):
         char, tag = parts
         
         if tag == 'O':
-            # 非实体，保存当前实体
+            # Not an entity; save the current entity
             if current_entity and current_entity_type:
                 if current_entity_type not in current_bird:
                     current_bird[current_entity_type] = []
@@ -57,25 +57,25 @@ def parse_bio_file(file_path):
             current_entity_text = ""
         
         elif tag.startswith('B-'):
-            # 新实体开始
-            # 先保存上一个实体
+            # New entity begins
+            # Save the previous entity first
             if current_entity and current_entity_type:
                 if current_entity_type not in current_bird:
                     current_bird[current_entity_type] = []
                 current_bird[current_entity_type].append(current_entity_text.strip())
             
-            # 开始新实体
+            # Start a new entity
             current_entity_type = tag[2:]
             current_entity_text = char
             current_entity = True
         
         elif tag.startswith('I-'):
-            # 实体继续
+            # The entity continues
             entity_type = tag[2:]
             if current_entity and entity_type == current_entity_type:
                 current_entity_text += char
             else:
-                # 新的实体类型，保存上一个
+                # New entity type, save the previous one
                 if current_entity and current_entity_type:
                     if current_entity_type not in current_bird:
                         current_bird[current_entity_type] = []
@@ -85,7 +85,7 @@ def parse_bio_file(file_path):
                 current_entity_text = char
                 current_entity = True
     
-    # 保存最后一个鸟类（如果有）
+    # Save the last bird (if any)
     if current_entity and current_entity_type:
         if current_entity_type not in current_bird:
             current_bird[current_entity_type] = []
@@ -99,78 +99,78 @@ def parse_bio_file(file_path):
 
 def bird_to_triples(bird_data):
     """
-    将单个鸟类的实体数据转换为三元组
+    Convert entity data for individual birds into triples
     """
     triples = []
     
-    # 获取主中文名（第一个中文名）
+    # Get the primary Chinese name (the first Chinese name)
     chinese_names = bird_data.get('中文名', [])
     if not chinese_names:
         return triples
     
     main_name = chinese_names[0]
     
-    # 1. 学名（拉丁名）
+    # 1. Scientific name (Latin name)
     if '拉丁名' in bird_data:
         for latin_name in bird_data['拉丁名']:
             triples.append((main_name, '学名为', latin_name))
     
-    # 2. 英文名
+    # 2. English name
     if '英文名' in bird_data:
         for english_name in bird_data['英文名']:
             triples.append((main_name, '英文名为', english_name))
     
-    # 3. 别名（除第一个中文名外的其他中文名）
+    # 3. Alias ​​(Chinese names other than the primary one)
     if len(chinese_names) > 1:
         for alias in chinese_names[1:]:
             triples.append((main_name, '又称', alias))
     
-    # 4. 科
+    # 4. division
     if '科' in bird_data:
         for ke in bird_data['科']:
             triples.append((main_name, '属于科', ke))
     
-    # 5. 目
+    # 5. Head
     if '目' in bird_data:
         for mu in bird_data['目']:
             triples.append((main_name, '属于目', mu))
     
-    # 6. 形态特征
+    # 6. Morphological characteristics
     if '特征' in bird_data:
         for feature in bird_data['特征']:
             triples.append((main_name, '形态特征', feature))
     
-    # 7. 叫声
+    # 7. Cry
     if '叫声' in bird_data:
         for sound in bird_data['叫声']:
             triples.append((main_name, '叫声为', sound))
     
-    # 8. 体长
+    # 8. Body length
     if '体长' in bird_data:
         for length in bird_data['体长']:
             triples.append((main_name, '体长范围', length))
     
-    # 9. 栖息地
+    # 9. Habitat
     if '栖息地' in bird_data:
         for habitat in bird_data['栖息地']:
             triples.append((main_name, '栖息于', habitat))
     
-    # 10. 分布地
+    # 10. Distribution
     if '分布地' in bird_data:
         for distribution in bird_data['分布地']:
             triples.append((main_name, '分布于', distribution))
     
-    # 11. 海拔
+    # 11. altitude
     if '海拔' in bird_data:
         for altitude in bird_data['海拔']:
             triples.append((main_name, '生活海拔', altitude))
     
-    # 12. 食物
+    # 12. food
     if '食物' in bird_data:
         for food in bird_data['食物']:
             triples.append((main_name, '食物有', food))
     
-    # 13. 迁徙情况
+    # 13. Migration patterns
     if '迁徙情况' in bird_data:
         for migration in bird_data['迁徙情况']:
             triples.append((main_name, '迁徙类型', migration))
@@ -180,7 +180,7 @@ def bird_to_triples(bird_data):
         for iucn in bird_data['IUCN']:
             triples.append((main_name, 'IUCN评级为', iucn))
     
-    # 15. 中国保护等级
+    # 15. China Protection Class
     if '中国保护等级' in bird_data:
         for protection in bird_data['中国保护等级']:
             triples.append((main_name, '国家保护级别为', protection))
@@ -190,11 +190,11 @@ def bird_to_triples(bird_data):
 
 def process_all_files(input_dir, output_file):
     """
-    批量处理所有txt文件并合并输出
+   Batch process all .txt files and merge the output
     """
-    # 获取所有txt文件，排除之前的train/dev/test
+    # Retrieve all .txt files, excluding the existing train, dev, and test sets.
     all_files = glob.glob(os.path.join(input_dir, '*.txt'))
-    # 过滤掉train.txt, dev.txt, test.txt
+    # Filter out train.txt, dev.txt, and test.txt.
     txt_files = [f for f in all_files if not os.path.basename(f) in ['train.txt', 'dev.txt', 'test.txt']]
     
     if not txt_files:
@@ -227,7 +227,7 @@ def process_all_files(input_dir, output_file):
             print(f"  处理出错: {e}")
             continue
     
-    # 保存所有三元组
+    # Save all triples
     print(f"\n正在保存三元组到: {output_file}")
     with open(output_file, 'w', encoding='utf-8') as f:
         for triple in all_triples:
@@ -242,7 +242,7 @@ def process_all_files(input_dir, output_file):
 
 def main():
     """
-    主函数
+           Main function
     """
     input_dir = '../清理后的数据'
     output_file = 'all_birds_triples.txt'
