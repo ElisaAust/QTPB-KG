@@ -8,7 +8,7 @@ FILES = {
 }
 
 def parse_file(path):
-    """解析 BIO 格式文件，返回 (字符总数, 实体计数dict)"""
+    """Parse a BIO-format file and return (total character count, entity count dictionary)."""
     entity_counts = defaultdict(int)
     char_count = 0
     current_entity = None
@@ -16,7 +16,7 @@ def parse_file(path):
     with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.rstrip("\n")
-            if not line:          # 空行为句子分隔
+            if not line:          # Blank lines serve as sentence separators.
                 current_entity = None
                 continue
 
@@ -26,10 +26,10 @@ def parse_file(path):
 
             char, tag = parts[0], parts[1]
 
-            # 统计字符数（仅统计非空白 token）
+            # Count characters (counting only non-whitespace tokens)
             char_count += len(char)
 
-            # 统计实体
+            # Statistical Entity
             if tag.startswith("B-"):
                 current_entity = tag[2:]
                 entity_counts[current_entity] += 1
@@ -39,7 +39,7 @@ def parse_file(path):
     return char_count, entity_counts
 
 
-# ── 逐文件统计 ────────────────────────────────────────────────────────────────
+# Per-file statistics
 all_entity_counts = defaultdict(int)
 all_chars         = 0
 file_stats        = {}
@@ -51,7 +51,7 @@ for split, path in FILES.items():
     for ent, cnt in entities.items():
         all_entity_counts[ent] += cnt
 
-# ── 输出 ──────────────────────────────────────────────────────────────────────
+# Output
 SEP  = "=" * 58
 SEP2 = "-" * 58
 
@@ -59,7 +59,7 @@ print(SEP)
 print(f"{'数据集统计报告':^54}")
 print(SEP)
 
-# 各文件分开统计
+# Statistics are compiled separately for each document.
 for split, stat in file_stats.items():
     print(f"\n【{split}.txt】  总字符数: {stat['chars']:,}")
     print(f"  {'实体类别':<12}  {'数量':>6}")
@@ -67,7 +67,7 @@ for split, stat in file_stats.items():
     for ent in sorted(stat["entities"]):
         print(f"  {ent:<12}  {stat['entities'][ent]:>6}")
 
-# 三文件合计
+# Combined total of the three documents
 print(f"\n{SEP}")
 print(f"【三文件合计】  总字符数: {all_chars:,}")
 print(f"  {'实体类别':<12}  {'数量':>6}  {'占比':>7}")
