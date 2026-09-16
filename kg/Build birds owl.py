@@ -79,7 +79,7 @@ def build(triples):
 
     L = []; W = L.append
 
-    # ── 文件头 ──
+    # ── File header ──
     W('<?xml version="1.0" encoding="UTF-8"?>')
     W(f'<rdf:RDF xmlns="{BASE_NS}"')
     W(f'     xml:base="{BASE}"')
@@ -94,7 +94,7 @@ def build(triples):
     W(f'    </owl:Ontology>')
     W('')
 
-    # ── 非鸟个体 ──
+    # ── Non-avian individual ──
     W('    <!-- ===== Non-Bird Individuals ===== -->')
     for cls in TARGET_CLASSES:
         if not class_inds[cls]: continue
@@ -106,7 +106,7 @@ def build(triples):
             W(f'    </owl:NamedIndividual>')
             W('')
 
-    # ── 鸟类个体 ──
+    # ── Individual birds ──
     W('    <!-- ===== 中文名 Individuals ===== -->')
     for bird in birds:
         W(f'    <owl:NamedIndividual rdf:about="{uri(bird)}">')
