@@ -1,7 +1,7 @@
 import sys
 import os
 
-# 自动获取当前脚本所在的绝对路径，并将其设为搜索根目录
+# Automatically obtain the absolute path of the current script and set it as the search root directory.
 cur_path = os.path.dirname(os.path.abspath(__file__))
 if cur_path not in sys.path:
     sys.path.insert(0, cur_path)
@@ -77,11 +77,10 @@ def predict():
             if os.path.exists(temp_file):
                 os.remove(temp_file)
         
-        # 创建数据集（保持 stride=128）
+        # Create dataset (keep stride=128)
         test_ds = NERDataset(test_sents, test_tags, tokenizer, tag2idx, max_len=512, stride=128)
         test_loader = DataLoader(test_ds, batch_size=1, shuffle=False, collate_fn=collate_fn)
 
-        # 🔴 方案1：只取每个chunk的非重叠部分
         all_tags = []
         processed_len = 0
         STRIDE = 128  # 和 NERDataset 的 stride 保持一致
@@ -95,47 +94,41 @@ def predict():
                 
                 preds = model(input_ids=input_ids, attention_mask=attention_mask)
                 
-                # 提取当前chunk的预测
                 chunk_tags = []
                 for l, p in zip(labels[0], preds[0]):
                     if l != -100:
                         chunk_tags.append(idx2tag[p])
                 
-                # 🔴 关键：只取非重叠部分
                 if chunk_idx == 0:
-                    # 第一个chunk：全部保留
+                    # First chunk: Keep everything.
                     all_tags.extend(chunk_tags)
                     processed_len = len(chunk_tags)
                 else:
-                    # 后续chunks：跳过重叠的stride部分
                     if len(chunk_tags) > STRIDE:
-                        # 跳过前STRIDE个（重叠部分）
                         all_tags.extend(chunk_tags[STRIDE:])
                         processed_len += len(chunk_tags) - STRIDE
-                    # 如果chunk很短（<STRIDE），说明是最后一段，全部保留
                     elif processed_len < len(text_no_space):
                         all_tags.extend(chunk_tags)
                         processed_len += len(chunk_tags)
                 
-                # 如果已经处理完所有字符，停止
                 if processed_len >= len(text_no_space):
                     break
         
-        # 确保长度匹配（处理可能的误差）
+        # Ensure lengths match (handling potential discrepancies)
         if len(all_tags) > len(text_no_space):
             all_tags = all_tags[:len(text_no_space)]
         elif len(all_tags) < len(text_no_space):
-            # 补齐不足的部分（理论上不应该发生）
+            # Make up for the deficiencies.
             all_tags.extend(['O'] * (len(text_no_space) - len(all_tags)))
         
-        # 插回空格
+        # Reinsert spaces
         full_chars = []
         full_tags = []
         no_space_idx = 0
         
         for orig_char in original_text:
             if orig_char == ' ':
-                # 空格继承前一个字符的标签
+                # The space inherits the tag of the preceding character.
                 if full_tags and full_tags[-1].startswith('I-'):
                     full_chars.append(' ')
                     full_tags.append(full_tags[-1])
@@ -151,7 +144,7 @@ def predict():
                     full_chars.append(orig_char)
                     full_tags.append('O')
         
-        # 提取实体
+        # Extract entities
         print(f"\n[识别结果] (文本长度: {len(text_no_space)} 字符, 处理了 {len(test_loader)} 个chunks):")
         curr_entity = ""
         curr_type = ""
