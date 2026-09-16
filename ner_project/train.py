@@ -1,7 +1,7 @@
 import sys
 import os
 
-# 自动获取当前脚本所在的绝对路径，并将其设为搜索根目录
+# Automatically obtain the absolute path of the current script and set it as the search root directory
 cur_path = os.path.dirname(os.path.abspath(__file__))
 if cur_path not in sys.path:
     sys.path.insert(0, cur_path)
@@ -14,7 +14,7 @@ from transformers import BertTokenizerFast
 from seqeval.metrics import classification_report, f1_score
 from tqdm import tqdm
 
-# === 1. 固定随机种子 ===
+# === 1. Fix the random seed ===
 def set_seed(seed=42):
     random.seed(seed)
     np.random.seed(seed)
@@ -23,21 +23,17 @@ def set_seed(seed=42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-# === 2. 路径设置 ===
+# === 2. Path Settings ===
 PROJECT_ROOT = os.path.dirname(__file__)
 MODEL_DIR = os.path.join(PROJECT_ROOT, 'model')
 if MODEL_DIR not in sys.path:
     sys.path.append(MODEL_DIR)
 
 from model.data_util import read_data, NERDataset, collate_fn
-# 注意：这里导入的是带 Attention 的模型类
 from model.bert_bilstm_crf import BertBiLSTMCRF
 
-# === 3. 训练函数 (已修复 CUDA -100 问题) ===
+# === 3. Training function  ===
 def train_epoch(model, optimizer, loader, device, o_tag_id):
-    """
-    o_tag_id: 'O' 标签的 ID，用于替换 -100 防止 CRF 报错
-    """
     model.train()
     total_loss = 0.0
     
@@ -46,7 +42,6 @@ def train_epoch(model, optimizer, loader, device, o_tag_id):
         attention_mask = batch['attention_mask'].to(device)
         labels = batch['labels'].to(device)
         
-        # 【关键修复】CRF 不支持 -100，必须替换为合法的 tag ID (通常是 'O')
         active_labels = torch.where(
             labels == -100, 
             torch.tensor(o_tag_id, device=device), 
@@ -56,10 +51,8 @@ def train_epoch(model, optimizer, loader, device, o_tag_id):
         inputs = {
             'input_ids':      input_ids,
             'attention_mask': attention_mask,
-            'labels':         active_labels # 传入清洗后的标签
+            'labels':         active_labels 
         }
-        
-        # 前向传播
         loss = model(**inputs)
         
         optimizer.zero_grad()
@@ -70,7 +63,7 @@ def train_epoch(model, optimizer, loader, device, o_tag_id):
         total_loss += loss.item()
     return total_loss / len(loader)
 
-# === 4. 验证函数 ===
+# === 4. Validation function ===
 def eval_model(model, loader, idx2tag, device):
     model.eval()
     all_preds, all_labels = [], []
@@ -81,11 +74,11 @@ def eval_model(model, loader, idx2tag, device):
             attention_mask = batch['attention_mask'].to(device)
             labels = batch['labels'].to(device)
             
-            # 解码预测 (兼容 decode 方法)
+            # Decoding prediction (compatible with the `decode` method)
             if hasattr(model, 'decode'):
                 batch_preds = model.decode(input_ids, attention_mask)
             else:
-                # 手动流程
+                # Manual process
                 bert_out = model.bert(input_ids=input_ids, attention_mask=attention_mask).last_hidden_state
                 lstm_out, _ = model.bilstm(bert_out)
                 
@@ -97,7 +90,7 @@ def eval_model(model, loader, idx2tag, device):
 
             labels = labels.cpu().numpy()
             
-            # 对齐标签
+            # Align labels
             for i, preds in enumerate(batch_preds):
                 true_labels = [idx2tag[l] for l, p in zip(labels[i], preds) if l != -100]
                 pred_labels = [idx2tag[p] for l, p in zip(labels[i], preds) if l != -100]
@@ -107,20 +100,19 @@ def eval_model(model, loader, idx2tag, device):
     f1 = f1_score(all_labels, all_preds)
     return f1
 
-# === 5. 主程序 ===
+# === 5. Main program ===
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", type=int, default=7)
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--lr", type=float, default=3e-5)
     parser.add_argument("--patience", type=int, default=3)
-    # 新增 attention 参数
     parser.add_argument("--attention", type=str, default="ufo", choices=['ufo'])
     args = parser.parse_args()
 
     set_seed(42)
 
-    # --- 自动寻找 BERT 路径 ---
+    # --- Automatically locate the BERT path. ---
     possible_paths = [
         'E:/PythonProject/ner_project/bert-base'
     ]
@@ -131,7 +123,7 @@ if __name__ == '__main__':
             break
     print(f"Loading BERT from: {bert_dir}")
 
-    # --- 数据准备 ---
+    # --- Data Preparation ---
     data_dir = os.path.join(PROJECT_ROOT, 'data')
     if not os.path.exists(data_dir): data_dir = PROJECT_ROOT
     
@@ -153,7 +145,7 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn)
     dev_loader = DataLoader(dev_ds, batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn)
 
-    # --- 初始化模型 ---
+    # --- Initialize the model---
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
     print(f"Attention Mode: {args.attention}")
@@ -168,10 +160,10 @@ if __name__ == '__main__':
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
 
-    # --- 训练循环 ---
+    # --- Training loop ---
     best_f1 = 0.0
     patience_counter = 0
-    # 注意：保存的文件名包含 attention 类型
+    # Note: The saved filename includes the attention type.
     best_path = f"bert_bilstm_{args.attention}_best.pt"
     o_tag_id = tag2idx['O']
 
@@ -179,7 +171,6 @@ if __name__ == '__main__':
     
     for epoch in range(1, args.epochs + 1):
         print(f"\n=== Epoch {epoch} ===")
-        # 传入 o_tag_id 修复报错
         train_loss = train_epoch(model, optimizer, train_loader, device, o_tag_id)
         print(f"Train Loss: {train_loss:.4f}")
 
