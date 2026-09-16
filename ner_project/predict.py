@@ -64,7 +64,6 @@ def predict():
 
         text_no_space = original_text.replace(' ', '')
         
-        # 写入临时文件
         temp_file = os.path.join(PROJECT_ROOT, 'temp_input.txt')
         try:
             with open(temp_file, 'w', encoding='utf-8') as f:
@@ -83,7 +82,7 @@ def predict():
 
         all_tags = []
         processed_len = 0
-        STRIDE = 128  # 和 NERDataset 的 stride 保持一致
+        STRIDE = 128  
 
         model.eval()
         with torch.no_grad():
