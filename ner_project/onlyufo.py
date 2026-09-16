@@ -9,7 +9,7 @@ from transformers import BertTokenizerFast
 from seqeval.metrics import classification_report, f1_score, precision_score, recall_score
 from tqdm import tqdm
 
-# === 1. 固定随机种子 ===
+# === 1. Fix the random seed ===
 def set_seed(seed=42):
     random.seed(seed)
     np.random.seed(seed)
@@ -18,7 +18,7 @@ def set_seed(seed=42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-# === 2. 路径设置 ===
+# === 2. Path Settings ===
 PROJECT_ROOT = os.path.dirname(__file__)
 MODEL_DIR = os.path.join(PROJECT_ROOT, 'model')
 if MODEL_DIR not in sys.path:
@@ -26,16 +26,16 @@ if MODEL_DIR not in sys.path:
 
 from data_util import read_data, NERDataset, collate_fn
 
-# 导入消融版模型
+# Import the ablation model.
 try:
     from ufoonly import BertBiLSTMCRF_UFOOnly
 except ImportError:
     print("❌ 错误：无法导入 BertBiLSTMCRF_UFOOnly。请检查 model/ufoonly.py")
     sys.exit(1)
 
-# === 3. 训练函数 ===
+# === 3. Training function ===
 def train_epoch(model, optimizer, loader, device, o_tag_id):
-    """训练一个 epoch"""
+    """Train for one epoch"""
     model.train()
     total_loss = 0.0
     
@@ -44,7 +44,6 @@ def train_epoch(model, optimizer, loader, device, o_tag_id):
         attention_mask = batch['attention_mask'].to(device)
         labels = batch['labels'].to(device)
         
-        # 替换 -100 为合法的 tag ID
         active_labels = torch.where(
             labels == -100, 
             torch.tensor(o_tag_id, device=device), 
@@ -67,9 +66,9 @@ def train_epoch(model, optimizer, loader, device, o_tag_id):
         total_loss += loss.item()
     return total_loss / len(loader)
 
-# === 4. 评估函数 ===
+# === 4. Evaluation function ===
 def eval_model(model, loader, idx2tag, device, show_report=False):
-    """评估模型"""
+    """Evaluation model"""
     model.eval()
     all_preds, all_labels = [], []
 
@@ -79,22 +78,22 @@ def eval_model(model, loader, idx2tag, device, show_report=False):
             attention_mask = batch['attention_mask'].to(device)
             labels = batch['labels'].cpu().numpy()
             
-            # 直接调用模型
+            # Directly call the model
             batch_preds = model(input_ids, attention_mask)
 
-            # 对齐标签
+            # Align labels
             for i, preds in enumerate(batch_preds):
                 true_labels = [idx2tag[l] for l, p in zip(labels[i], preds) if l != -100]
                 pred_labels = [idx2tag[p] for l, p in zip(labels[i], preds) if l != -100]
                 all_preds.append(pred_labels)
                 all_labels.append(true_labels)
 
-    # 计算指标
+    # Calculation metrics
     precision = precision_score(all_labels, all_preds)
     recall = recall_score(all_labels, all_preds)
     f1 = f1_score(all_labels, all_preds)
     
-    # 显示详细报告
+    # Show detailed report
     if show_report:
         print("\n" + "="*30 + " 最终评估报告 " + "="*30)
         print(f"准确率 (Precision): {precision * 100:.2f}%")
@@ -105,7 +104,7 @@ def eval_model(model, loader, idx2tag, device, show_report=False):
     
     return f1, precision, recall
 
-# === 5. 主程序 ===
+# === 5. Main program ===
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", type=int, default=7)
@@ -117,7 +116,7 @@ if __name__ == '__main__':
 
     set_seed(args.seed)
 
-    # --- 自动寻找 BERT 路径 ---
+    # --- Automatically locate the BERT path. ---
     possible_paths = [
         '/root/autodl-tmp/ner_project/bert-base-chinese', 
         '/root/autodl-tmp/ner_project/bert_base',
@@ -131,7 +130,7 @@ if __name__ == '__main__':
             break
     print(f"Loading BERT from: {bert_dir}")
 
-    # --- 数据准备 ---
+    # --- Data Preparation ---
     data_dir = os.path.join(PROJECT_ROOT, 'data')
     if not os.path.exists(data_dir): 
         data_dir = PROJECT_ROOT
@@ -160,7 +159,7 @@ if __name__ == '__main__':
     dev_loader = DataLoader(dev_ds, batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn)
     test_loader = DataLoader(test_ds, batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn)
 
-    # --- 初始化模型 ---
+    # --- Initialize the model ---
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     print(f"\n{'='*70}")
@@ -179,7 +178,7 @@ if __name__ == '__main__':
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
 
-    # --- 训练循环 ---
+    # --- Training loop ---
     best_f1 = 0.0
     patience_counter = 0
     best_path = "权重/bert_bilstm_ufoonly_best.pt"
@@ -194,16 +193,16 @@ if __name__ == '__main__':
         print(f"Epoch {epoch}/{args.epochs}")
         print(f"{'='*70}")
         
-        # 训练
+        # train
         train_loss = train_epoch(model, optimizer, train_loader, device, o_tag_id)
         print(f"Train Loss: {train_loss:.4f}")
 
-        # 验证
+        # dev
         print("\n>>> 验证集评估 <<<")
         val_f1, val_precision, val_recall = eval_model(model, dev_loader, idx2tag, device, show_report=False)
         print(f"Validation F1: {val_f1 * 100:.2f}% | Precision: {val_precision * 100:.2f}% | Recall: {val_recall * 100:.2f}%")
 
-        # 保存最佳模型
+        # Save the best model
         if val_f1 > best_f1:
             best_f1 = val_f1
             torch.save(model.state_dict(), best_path)
@@ -216,7 +215,7 @@ if __name__ == '__main__':
                 print("⏹️ Early stopping!")
                 break
 
-    # --- 加载最佳模型并测试 ---
+    # --- Load the best model and test. ---
     print(f"\n{'='*70}")
     print("训练完成！加载最佳模型进行测试...")
     print(f"{'='*70}\n")
@@ -228,14 +227,14 @@ if __name__ == '__main__':
         print(f"✅ 已加载最佳模型: {best_path}")
         print(f"✅ 最佳验证 F1: {best_f1 * 100:.2f}%\n")
     
-    # 测试集最终评估
+    # Final evaluation on the test set
     print(f"{'='*70}")
     print("测试集最终评估")
     print(f"{'='*70}")
     
     test_f1, test_precision, test_recall = eval_model(model, test_loader, idx2tag, device, show_report=True)
     
-    # 最终总结
+    # Final Summary
     print(f"\n{'='*70}")
     print("🎯 实验结果总结")
     print(f"{'='*70}")
