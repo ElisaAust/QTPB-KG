@@ -4,7 +4,7 @@ import numpy as np
 
 
 # ══════════════════════════════════════════════════════════════
-# 1. Jaccard bigram 相似度（0~10 分，无需任何依赖）
+# 1. Jaccard bigram similarity (0–1, no dependencies required)
 # ══════════════════════════════════════════════════════════════
 
 def jaccard_bigram(a: str, b: str) -> float:
@@ -21,11 +21,10 @@ def jaccard_bigram(a: str, b: str) -> float:
 
 
 # ══════════════════════════════════════════════════════════════
-# 2. 用 transformers + torch 直接加载模型，手动 mean pooling
+# 2. Load the model directly using `transformers` + `torch` and perform mean pooling manually.
 # ══════════════════════════════════════════════════════════════
 
 def load_model(model_path: str):
-    """加载本地 BERT 模型和分词器"""
     from transformers import BertTokenizer, BertModel
     print(f"加载分词器：{model_path}")
     tokenizer = BertTokenizer.from_pretrained(model_path)
@@ -37,14 +36,12 @@ def load_model(model_path: str):
 
 
 def mean_pooling(token_embeddings, attention_mask):
-    """对 token embeddings 做 attention mask 加权平均"""
     import torch
     mask = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
     return (token_embeddings * mask).sum(dim=1) / mask.sum(dim=1).clamp(min=1e-9)
 
 
 def encode_texts(tokenizer, model, texts: list, batch_size: int = 64) -> dict:
-    """批量编码文本，返回 {text: L2归一化向量}"""
     import torch
     all_vecs = []
     total = len(texts)
@@ -69,16 +66,16 @@ def encode_texts(tokenizer, model, texts: list, batch_size: int = 64) -> dict:
 
 
 def sbert_score(vec_a, vec_b) -> float:
-    """余弦相似度（已L2归一化），返回 0~10 分"""
+    """Cosine similarity (L2-normalized), returning a score of 0–10."""
     return round(max(0.0, float(np.dot(vec_a, vec_b))) * 10, 2)
 
 
 # ══════════════════════════════════════════════════════════════
-# 3. 工具函数
+# 3. Utility functions
 # ══════════════════════════════════════════════════════════════
 
 def resolve(val: str, merge_map: dict) -> str:
-    """递归查找最终代表词，防止链式引用"""
+    """Recursively look up the ultimate representative term to prevent chained references"""
     visited = set()
     while val in merge_map and val not in visited:
         visited.add(val)
@@ -87,7 +84,7 @@ def resolve(val: str, merge_map: dict) -> str:
 
 
 # ══════════════════════════════════════════════════════════════
-# 4. 主流程
+# 4. Main workflow
 # ══════════════════════════════════════════════════════════════
 
 def main():
@@ -102,7 +99,7 @@ def main():
                         help='综合得分阈值（0~10），默认6.5')
     args = parser.parse_args()
 
-    # ── 读入三元组 ──────────────────────────────────
+    # ── Read in the triples ──────────────────────────────────
     print(f"读入：{args.input}")
     triples = []
     with open(args.input, encoding='utf-8') as f:
@@ -114,17 +111,17 @@ def main():
                 triples.append(parts)
     print(f"共 {len(triples)} 条三元组")
 
-    # ── 提取目标谓词实体值 ──────────────────────────
+    # ── Extract target predicate entity values ──────────────────────────
     freq     = Counter(o for s, p, o in triples if p == args.pred)
     entities = list(freq.keys())
     print(f"\n谓词【{args.pred}】共 {len(entities)} 个唯一实体值")
 
-    # ── 加载模型并编码 ──────────────────────────────
+    # ── Load the model and encode ──────────────────────────────
     tokenizer, model = load_model(args.model)
     print(f"\n开始编码...")
     vec_map = encode_texts(tokenizer, model, entities)
 
-    # ── 计算所有实体对得分（上三角）────────────────
+    # ── Calculate scores for all entity pairs (upper triangle)────────────────
     n_pairs = len(entities) * (len(entities) - 1) // 2
     print(f"\n计算两两综合得分（共 {n_pairs} 对）...")
     candidates = []
@@ -144,7 +141,7 @@ def main():
         print("没有候选对，程序结束。")
         return
 
-    # ── 交互判断 ────────────────────────────────────
+    # ── Interactive judgment ────────────────────────────────────
     merge_map = {}
     log_rows  = []
 
@@ -164,13 +161,13 @@ def main():
         shown += 1
         fa, fb = freq[ra], freq[rb]
 
-        # 优先保留频率最高的；频率相同时保留字符更短的（更简洁）
+        # Prioritize retaining the one with the highest frequency; if frequencies are equal, retain the one with the shorter character length
         if fa > fb:
-            keep, replace = ra, rb   # A 频率更高，保留 A
+            keep, replace = ra, rb   # A has a higher frequency; retain A.
         elif fb > fa:
-            keep, replace = rb, ra   # B 频率更高，保留 B
+            keep, replace = rb, ra   #B has a higher frequency; retain B.
         else:
-            # 频率相同：保留更短的（通常是更通用的词，如"森林"而非"山地森林"）
+            # Same frequency: keep the shorter one
             keep, replace = (ra, rb) if len(ra) <= len(rb) else (rb, ra)
 
         print(f"[{shown}]  综合得分 {combined}"
@@ -201,7 +198,7 @@ def main():
             print("  已停止，保存当前结果...\n")
             break
 
-    # ── 写出三元组 ──────────────────────────────────
+    # ── Write down the triples ──────────────────────────────────
     n_replaced  = 0
     out_triples = []
     for s, p, o in triples:
@@ -217,13 +214,13 @@ def main():
         for s, p, o in out_triples:
             f.write(f"{s}\t{p}\t{o}\n")
 
-            # ── 写出日志 ────────────────────────────────────
+            # ── Write a log entry ────────────────────────────────────
     with open(args.log, 'w', encoding='utf-8') as f:
         f.write("实体A\t实体B\t综合得分\tJaccard\tSBERT\t保留词\t被替换词\t操作\n")
         for row in log_rows:
             f.write('\t'.join(str(x) for x in row) + '\n')
 
-    # ── 汇总 ────────────────────────────────────────
+    # ── Summary ────────────────────────────────────────
     merged_count = sum(1 for r in log_rows if r[-1] == 'merged')
     after_unique = len(set(o for s, p, o in out_triples if p == args.pred))
     print("═" * 50)
